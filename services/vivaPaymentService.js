@@ -1,5 +1,5 @@
 const axios = require('axios');
-require('dotenv').config();
+const qs = require('qs');
 
 class VivaPaymentService {
     constructor() {
@@ -9,21 +9,27 @@ class VivaPaymentService {
 
     async getAccessToken() {
         try {
-            const response = await axios.post('https://accounts.vivapayments.com/connect/token', {}, {
-                auth: {
-                    username: this.clientId,
-                    password: this.clientSecret
-                },
-                params: {
-                    grant_type: 'client_credentials'
+            const response = await axios.post(
+                'https://accounts.vivapayments.com/connect/token',
+                qs.stringify({ grant_type: 'client_credentials' }),
+                {
+                    auth: {
+                        username: this.clientId,
+                        password: this.clientSecret,
+                    },
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
                 }
-            });
+            );
 
-            console.log('Received access token from Viva Wallet API', response.data.access_token);
-            return response.data.access_token;
+            const data = response.data;
+            console.log('Received access token:', data.access_token);
+
+            return data.access_token;
         } catch (error) {
-            console.error('Error fetching access token', error);
-            throw error;
+            console.error('Error requesting access token:', error.response ? error.response.data : error.message);
+            throw new Error('Failed to retrieve access token');
         }
     }
 
@@ -31,27 +37,33 @@ class VivaPaymentService {
         try {
             const accessToken = await this.getAccessToken();
 
-            const response = await axios.post('https://api.vivapayments.com/checkout/v2/orders', {
-                amount: amount,
-                customerTrns: customerDetails.customerTrns,
-                customer: {
-                    email: customerDetails.email,
-                    fullName: customerDetails.fullName,
-                    requestLang: customerDetails.requestLang
+            const response = await axios.post(
+                'https://api.vivapayments.com/checkout/v2/orders',
+                {
+                    amount,
+                    customerTrns: customerDetails.customerTrns,
+                    customer: {
+                        email: customerDetails.email,
+                        fullName: customerDetails.fullName,
+                        requestLang: customerDetails.requestLang,
+                    },
+                    paymentNotification: true,
                 },
-                paymentNotification: true
-            }, {
-                headers: {
-                    'Authorization': `Bearer ${accessToken}`,
-                    'Content-Type': 'application/json'
+                {
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`,
+                        'Content-Type': 'application/json',
+                    },
                 }
-            });
+            );
 
-            console.log('Order created successfully', response.data);
-            return response.data;
+            const order = response.data;
+            console.log('Order created successfully:', order);
+
+            return order;
         } catch (error) {
-            console.error('Error creating order', error);
-            throw error;
+            console.error('Error creating order:', error.response ? error.response.data : error.message);
+            throw new Error('Failed to create order');
         }
     }
 }
