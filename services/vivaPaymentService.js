@@ -41,7 +41,7 @@ class VivaPaymentService {
             const response = await axios.post(
                 'https://api.vivapayments.com/checkout/v2/orders',
                 {
-                    adjustedAmount,
+                    amount:adjustedAmount,
                     customerTrns: customerDetails.customerTrns,
                     customer: {
                         email: customerDetails.email,
