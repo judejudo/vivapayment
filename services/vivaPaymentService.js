@@ -35,12 +35,13 @@ class VivaPaymentService {
 
     async createOrder(amount, customerDetails) {
         try {
+            const adjustedAmount = amount * 100 ;
             const accessToken = await this.getAccessToken();
 
             const response = await axios.post(
                 'https://api.vivapayments.com/checkout/v2/orders',
                 {
-                    amount,
+                    adjustedAmount,
                     customerTrns: customerDetails.customerTrns,
                     customer: {
                         email: customerDetails.email,
