@@ -49,6 +49,7 @@ class VivaPaymentService {
                         requestLang: customerDetails.requestLang,
                     },
                     paymentNotification: true,
+                    currencyCode: 840,
                 },
                 {
                     headers: {
