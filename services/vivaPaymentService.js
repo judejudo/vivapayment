@@ -49,7 +49,7 @@ class VivaPaymentService {
                         requestLang: customerDetails.requestLang,
                     },
                     paymentNotification: true,
-                    currencyCode: 752,
+                    
                 },
                 {
                     headers: {
